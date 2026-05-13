@@ -1,1 +1,1220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Barangay Bacuranan Management System</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4f1eb;
+    --surface: #fffef9;
+    --surface2: #f0ede4;
+    --border: #d6d0c4;
+    --border2: #c4bdb0;
+    --text: #1a1714;
+    --text2: #6b6560;
+    --text3: #9c9690;
+    --accent: #1a4d3c;
+    --accent-light: #e8f2ee;
+    --accent2: #c8703a;
+    --accent2-light: #fdf0e8;
+    --danger: #b83232;
+    --danger-light: #fdf0f0;
+    --warning: #a06020;
+    --warning-light: #fdf5e8;
+    --radius: 10px;
+    --radius-lg: 16px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.05);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; }
 
+  /* Layout */
+  .app { display: flex; min-height: 100vh; }
+  .sidebar { width: 240px; background: var(--accent); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; height: 100vh; z-index: 100; }
+  .main { margin-left: 240px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+  .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 28px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+  .content { padding: 28px; flex: 1; }
+
+  /* Sidebar */
+  .sidebar-header { padding: 24px 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.12); }
+  .sidebar-logo { font-family: 'Instrument Serif', serif; font-size: 18px; color: #fff; line-height: 1.2; }
+  .sidebar-logo span { font-size: 11px; font-family: 'Plus Jakarta Sans', sans-serif; opacity: 0.6; display: block; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px; }
+  .sidebar-nav { padding: 12px 12px; flex: 1; overflow-y: auto; }
+  .nav-section { font-size: 10px; color: rgba(255,255,255,0.45); letter-spacing: 0.1em; text-transform: uppercase; padding: 12px 8px 6px; font-weight: 600; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; cursor: pointer; color: rgba(255,255,255,0.75); font-size: 13.5px; font-weight: 500; transition: all 0.15s; margin-bottom: 2px; }
+  .nav-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
+  .nav-item.active { background: rgba(255,255,255,0.18); color: #fff; }
+  .nav-item svg { opacity: 0.8; flex-shrink: 0; }
+  .nav-badge { margin-left: auto; background: var(--accent2); color: #fff; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px; }
+  .sidebar-footer { padding: 16px; border-top: 1px solid rgba(255,255,255,0.12); }
+  .brgy-info { font-size: 11px; color: rgba(255,255,255,0.5); text-align: center; line-height: 1.6; }
+
+  /* Topbar */
+  .page-title { font-size: 17px; font-weight: 600; color: var(--text); }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: var(--radius); font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; font-family: inherit; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #133d30; }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: var(--border); }
+  .btn-danger { background: var(--danger-light); color: var(--danger); border: 1px solid #f0c0c0; }
+  .btn-danger:hover { background: #f5d0d0; }
+  .btn-sm { padding: 5px 11px; font-size: 12px; }
+  .btn-xs { padding: 3px 8px; font-size: 11px; border-radius: 6px; }
+
+  /* Cards */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow); }
+  .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .card-title { font-size: 14px; font-weight: 600; color: var(--text); }
+  .card-subtitle { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+  /* Stats grid */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px 20px; }
+  .stat-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em; font-weight: 600; margin-bottom: 8px; }
+  .stat-value { font-size: 28px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; line-height: 1; }
+  .stat-sub { font-size: 11px; color: var(--text2); margin-top: 4px; }
+  .stat-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+  .icon-green { background: var(--accent-light); color: var(--accent); }
+  .icon-orange { background: var(--accent2-light); color: var(--accent2); }
+  .icon-red { background: var(--danger-light); color: var(--danger); }
+  .icon-blue { background: #e8f0fd; color: #2d5fb8; }
+
+  /* Table */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; padding: 10px 14px; border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; }
+  td { padding: 11px 14px; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--text); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface2); }
+  .td-actions { display: flex; gap: 6px; }
+
+  /* Badges */
+  .badge { display: inline-flex; align-items: center; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
+  .badge-green { background: var(--accent-light); color: var(--accent); }
+  .badge-orange { background: var(--accent2-light); color: var(--accent2); }
+  .badge-red { background: var(--danger-light); color: var(--danger); }
+  .badge-blue { background: #e8f0fd; color: #2d5fb8; }
+  .badge-gray { background: var(--surface2); color: var(--text2); }
+
+  /* Modal */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border-radius: var(--radius-lg); width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+  .modal-header { padding: 20px 24px 0; display: flex; align-items: center; justify-content: space-between; }
+  .modal-title { font-size: 16px; font-weight: 700; }
+  .modal-close { background: var(--surface2); border: none; cursor: pointer; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text2); font-size: 16px; font-family: inherit; }
+  .modal-body { padding: 20px 24px 24px; }
+
+  /* Form */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-group.full { grid-column: 1 / -1; }
+  label { font-size: 12px; font-weight: 600; color: var(--text2); }
+  input, select, textarea { font-family: inherit; font-size: 13px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); transition: border-color 0.15s; outline: none; width: 100%; }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(26,77,60,0.1); }
+  textarea { resize: vertical; min-height: 80px; }
+  .form-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+
+  /* Sections */
+  .section { display: none; }
+  .section.active { display: block; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .section-title { font-size: 20px; font-weight: 700; }
+  .section-desc { font-size: 13px; color: var(--text2); margin-top: 3px; }
+
+  /* Search */
+  .search-bar { position: relative; }
+  .search-bar input { padding-left: 34px; width: 220px; }
+  .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text3); pointer-events: none; }
+
+  /* Empty state */
+  .empty { text-align: center; padding: 48px 20px; color: var(--text3); }
+  .empty-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.4; }
+  .empty p { font-size: 13px; }
+
+  /* Toast */
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: #fff; padding: 12px 18px; border-radius: 10px; font-size: 13px; font-weight: 500; z-index: 9999; transform: translateY(80px); opacity: 0; transition: all 0.3s; max-width: 300px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success { background: var(--accent); }
+  .toast.error { background: var(--danger); }
+
+  /* Dashboard quick actions */
+  .quick-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .quick-btn { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; cursor: pointer; text-align: center; transition: all 0.15s; }
+  .quick-btn:hover { border-color: var(--accent); background: var(--accent-light); }
+  .quick-btn svg { display: block; margin: 0 auto 8px; color: var(--accent); }
+  .quick-btn span { font-size: 12px; font-weight: 600; color: var(--text); }
+
+  /* Recent list */
+  .recent-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .recent-item:last-child { border-bottom: none; }
+  .avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--accent-light); color: var(--accent); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .recent-name { font-size: 13px; font-weight: 600; }
+  .recent-detail { font-size: 11px; color: var(--text3); }
+
+  /* Doc request status tracker */
+  .status-steps { display: flex; gap: 0; margin: 12px 0; }
+  .step { flex: 1; text-align: center; position: relative; }
+  .step::before { content: ''; position: absolute; top: 12px; left: -50%; right: 50%; height: 2px; background: var(--border); }
+  .step:first-child::before { display: none; }
+  .step-dot { width: 24px; height: 24px; border-radius: 50%; background: var(--border); margin: 0 auto 6px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: var(--text3); position: relative; z-index: 1; }
+  .step.done .step-dot { background: var(--accent); color: #fff; }
+  .step.done::before { background: var(--accent); }
+  .step-label { font-size: 10px; color: var(--text3); }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media(max-width: 768px) { .two-col { grid-template-columns: 1fr; } .sidebar { transform: translateX(-100%); } .main { margin-left: 0; } .form-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        Barangay Bacuranan
+        <span>Management System</span>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Main</div>
+      <div class="nav-item active" onclick="showSection('dashboard')">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-item" onclick="showSection('residents')">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Residents
+        <span class="nav-badge" id="nav-residents-count">0</span>
+      </div>
+      <div class="nav-item" onclick="showSection('households')">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Households
+      </div>
+      <div class="nav-section">Documents</div>
+      <div class="nav-item" onclick="showSection('clearance')">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Clearance
+        <span class="nav-badge" id="nav-doc-count">0</span>
+      </div>
+      <div class="nav-item" onclick="showSection('indigency')">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34"/><polygon points="18 2 22 6 12 16 8 16 8 12 18 2"/></svg>
+        Indigency Cert.
+      </div>
+      <div class="nav-section">Services</div>
+      <div class="nav-item" onclick="showSection('blotter')">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Blotter Records
+      </div>
+      <div class="nav-item" onclick="showSection('officials')">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/><polyline points="12 12 12 16"/><line x1="10" y1="16" x2="14" y2="16"/></svg>
+        Officials
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="brgy-info" id="brgy-name-display">Barangay Bacuranan<br>Management System<br><small>v1.0</small></div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <div class="page-title" id="page-title">Dashboard</div>
+      <div class="topbar-right">
+        <div class="search-bar">
+          <svg class="search-icon" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="global-search" placeholder="Search residents..." oninput="globalSearch(this.value)">
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openAddModal()">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add New
+        </button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="section active" id="section-dashboard">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Good day! 👋</div>
+            <div class="section-desc">Here's an overview of your barangay today.</div>
+          </div>
+        </div>
+
+        <div class="stats-grid" id="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon icon-green"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+            <div class="stat-label">Total Residents</div>
+            <div class="stat-value" id="stat-residents">0</div>
+            <div class="stat-sub">Registered in system</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon icon-blue"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+            <div class="stat-label">Households</div>
+            <div class="stat-value" id="stat-households">0</div>
+            <div class="stat-sub">Total households</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon icon-orange"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+            <div class="stat-label">Doc Requests</div>
+            <div class="stat-value" id="stat-docs">0</div>
+            <div class="stat-sub">Pending: <span id="stat-pending">0</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon icon-red"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+            <div class="stat-label">Blotter Cases</div>
+            <div class="stat-value" id="stat-blotter">0</div>
+            <div class="stat-sub">Active: <span id="stat-active-cases">0</span></div>
+          </div>
+        </div>
+
+        <div class="quick-actions">
+          <div class="quick-btn" onclick="showSection('residents'); openAddResidentModal()">
+            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+            <span>Add Resident</span>
+          </div>
+          <div class="quick-btn" onclick="showSection('clearance'); openDocModal('clearance')">
+            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="9 12 8 13 7 12"/><polyline points="12 12 12 17"/></svg>
+            <span>New Clearance</span>
+          </div>
+          <div class="quick-btn" onclick="showSection('indigency'); openDocModal('indigency')">
+            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34"/><polygon points="18 2 22 6 12 16 8 16 8 12 18 2"/></svg>
+            <span>Indigency Cert.</span>
+          </div>
+          <div class="quick-btn" onclick="showSection('blotter'); openBlotterModal()">
+            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span>File Blotter</span>
+          </div>
+          <div class="quick-btn" onclick="showSection('households'); openHouseholdModal()">
+            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <span>Add Household</span>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Recent Residents</div>
+                <div class="card-subtitle">Latest added</div>
+              </div>
+              <button class="btn btn-secondary btn-xs" onclick="showSection('residents')">View all</button>
+            </div>
+            <div id="recent-residents-list">
+              <div class="empty"><div class="empty-icon">👥</div><p>No residents yet</p></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Pending Documents</div>
+                <div class="card-subtitle">Awaiting release</div>
+              </div>
+              <button class="btn btn-secondary btn-xs" onclick="showSection('clearance')">View all</button>
+            </div>
+            <div id="pending-docs-list">
+              <div class="empty"><div class="empty-icon">📄</div><p>No pending requests</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESIDENTS -->
+      <div class="section" id="section-residents">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Residents</div>
+            <div class="section-desc">Manage all registered residents</div>
+          </div>
+          <button class="btn btn-primary" onclick="openAddResidentModal()">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Resident
+          </button>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="search-bar">
+              <svg class="search-icon" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" placeholder="Search residents..." oninput="filterResidents(this.value)" id="residents-search">
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <select id="filter-gender" onchange="filterResidents(document.getElementById('residents-search').value)" style="font-size:12px;padding:6px 10px">
+                <option value="">All Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+              <select id="filter-civil" onchange="filterResidents(document.getElementById('residents-search').value)" style="font-size:12px;padding:6px 10px">
+                <option value="">All Status</option>
+                <option value="Single">Single</option>
+                <option value="Married">Married</option>
+                <option value="Widowed">Widowed</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th><th>Age</th><th>Gender</th><th>Civil Status</th><th>Address</th><th>Contact</th><th>Voter</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="residents-tbody">
+                <tr><td colspan="8"><div class="empty"><div class="empty-icon">👥</div><p>No residents added yet</p></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- HOUSEHOLDS -->
+      <div class="section" id="section-households">
+        <div class="section-header">
+          <div><div class="section-title">Households</div><div class="section-desc">Manage barangay households</div></div>
+          <button class="btn btn-primary" onclick="openHouseholdModal()">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Household
+          </button>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Household Head</th><th>Address</th><th>Members</th><th>Purok/Zone</th><th>Remarks</th><th>Actions</th></tr></thead>
+              <tbody id="households-tbody">
+                <tr><td colspan="6"><div class="empty"><div class="empty-icon">🏠</div><p>No households added yet</p></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- CLEARANCE -->
+      <div class="section" id="section-clearance">
+        <div class="section-header">
+          <div><div class="section-title">Barangay Clearance</div><div class="section-desc">Clearance certificate requests</div></div>
+          <button class="btn btn-primary" onclick="openDocModal('clearance')">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New Request
+          </button>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Requestor</th><th>Purpose</th><th>Date Requested</th><th>Status</th><th>O.R. No.</th><th>Amount</th><th>Actions</th></tr></thead>
+              <tbody id="clearance-tbody">
+                <tr><td colspan="7"><div class="empty"><div class="empty-icon">📋</div><p>No clearance requests yet</p></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- INDIGENCY -->
+      <div class="section" id="section-indigency">
+        <div class="section-header">
+          <div><div class="section-title">Indigency Certificate</div><div class="section-desc">Certificate of indigency requests</div></div>
+          <button class="btn btn-primary" onclick="openDocModal('indigency')">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New Request
+          </button>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Requestor</th><th>Purpose</th><th>Date Requested</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="indigency-tbody">
+                <tr><td colspan="5"><div class="empty"><div class="empty-icon">📋</div><p>No indigency requests yet</p></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- BLOTTER -->
+      <div class="section" id="section-blotter">
+        <div class="section-header">
+          <div><div class="section-title">Blotter Records</div><div class="section-desc">Incident and complaint records</div></div>
+          <button class="btn btn-primary" onclick="openBlotterModal()">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            File Blotter
+          </button>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Case No.</th><th>Complainant</th><th>Respondent</th><th>Incident</th><th>Date Filed</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="blotter-tbody">
+                <tr><td colspan="7"><div class="empty"><div class="empty-icon">🛡️</div><p>No blotter records yet</p></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- OFFICIALS -->
+      <div class="section" id="section-officials">
+        <div class="section-header">
+          <div><div class="section-title">Barangay Officials</div><div class="section-desc">Current term officials</div></div>
+          <button class="btn btn-primary" onclick="openOfficialModal()">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Official
+          </button>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Name</th><th>Position</th><th>Contact</th><th>Committee</th><th>Term Start</th><th>Actions</th></tr></thead>
+              <tbody id="officials-tbody">
+                <tr><td colspan="6"><div class="empty"><div class="empty-icon">🏅</div><p>No officials added yet</p></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODALS -->
+
+<!-- Add Resident Modal -->
+<div class="modal-overlay" id="modal-resident">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="resident-modal-title">Add Resident</div>
+      <button class="modal-close" onclick="closeModal('modal-resident')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="resident-id">
+      <div class="form-grid">
+        <div class="form-group"><label>Last Name *</label><input type="text" id="r-lastname" placeholder="Dela Cruz"></div>
+        <div class="form-group"><label>First Name *</label><input type="text" id="r-firstname" placeholder="Juan"></div>
+        <div class="form-group"><label>Middle Name</label><input type="text" id="r-middlename" placeholder="Santos"></div>
+        <div class="form-group"><label>Birthdate *</label><input type="date" id="r-birthdate"></div>
+        <div class="form-group"><label>Gender *</label>
+          <select id="r-gender"><option value="">Select</option><option>Male</option><option>Female</option></select>
+        </div>
+        <div class="form-group"><label>Civil Status</label>
+          <select id="r-civil"><option value="">Select</option><option>Single</option><option>Married</option><option>Widowed</option><option>Separated</option></select>
+        </div>
+        <div class="form-group"><label>Contact No.</label><input type="text" id="r-contact" placeholder="09XXXXXXXXX"></div>
+        <div class="form-group"><label>Purok/Zone</label><input type="text" id="r-purok" placeholder="Purok 1"></div>
+        <div class="form-group full"><label>Address</label><input type="text" id="r-address" placeholder="House No., Street, Barangay"></div>
+        <div class="form-group"><label>Occupation</label><input type="text" id="r-occupation" placeholder="Farmer / Student / etc."></div>
+        <div class="form-group"><label>Voter Status</label>
+          <select id="r-voter"><option value="No">Not Registered</option><option value="Yes">Registered Voter</option></select>
+        </div>
+        <div class="form-group"><label>4Ps Beneficiary</label>
+          <select id="r-4ps"><option value="No">No</option><option value="Yes">Yes</option></select>
+        </div>
+        <div class="form-group"><label>PWD</label>
+          <select id="r-pwd"><option value="No">No</option><option value="Yes">Yes</option></select>
+        </div>
+      </div>
+      <div class="form-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modal-resident')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveResident()">Save Resident</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Household Modal -->
+<div class="modal-overlay" id="modal-household">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Add Household</div>
+      <button class="modal-close" onclick="closeModal('modal-household')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="household-id">
+      <div class="form-grid">
+        <div class="form-group full"><label>Household Head *</label><input type="text" id="h-head" placeholder="Full name of household head"></div>
+        <div class="form-group full"><label>Address *</label><input type="text" id="h-address" placeholder="Complete address"></div>
+        <div class="form-group"><label>Purok/Zone</label><input type="text" id="h-purok" placeholder="Purok 1"></div>
+        <div class="form-group"><label>Number of Members</label><input type="number" id="h-members" min="1" value="1"></div>
+        <div class="form-group full"><label>Remarks</label><textarea id="h-remarks" placeholder="Additional notes..."></textarea></div>
+      </div>
+      <div class="form-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modal-household')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveHousehold()">Save Household</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Document (Clearance/Indigency) Modal -->
+<div class="modal-overlay" id="modal-doc">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="doc-modal-title">Barangay Clearance</div>
+      <button class="modal-close" onclick="closeModal('modal-doc')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="doc-type">
+      <input type="hidden" id="doc-id">
+      <div class="form-grid">
+        <div class="form-group full"><label>Requestor Name *</label><input type="text" id="doc-requestor" placeholder="Full name"></div>
+        <div class="form-group full"><label>Address</label><input type="text" id="doc-address" placeholder="Complete address"></div>
+        <div class="form-group full"><label>Purpose *</label>
+          <select id="doc-purpose">
+            <option value="">Select purpose</option>
+            <option>Employment</option>
+            <option>Business Permit</option>
+            <option>School Requirement</option>
+            <option>Loan Application</option>
+            <option>Police Clearance Requirement</option>
+            <option>Medical / Hospital Assistance</option>
+            <option>DSWD / Scholarship</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group" id="doc-or-group"><label>O.R. Number</label><input type="text" id="doc-or" placeholder="OR-0001"></div>
+        <div class="form-group" id="doc-amount-group"><label>Amount (₱)</label><input type="number" id="doc-amount" placeholder="50.00" min="0"></div>
+        <div class="form-group"><label>Status</label>
+          <select id="doc-status">
+            <option value="Pending">Pending</option>
+            <option value="Processing">Processing</option>
+            <option value="Ready">Ready for Release</option>
+            <option value="Released">Released</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Date Requested</label><input type="date" id="doc-date"></div>
+      </div>
+      <div class="form-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modal-doc')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveDocument()">Save Request</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Blotter Modal -->
+<div class="modal-overlay" id="modal-blotter">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">File Blotter Record</div>
+      <button class="modal-close" onclick="closeModal('modal-blotter')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="blotter-id">
+      <div class="form-grid">
+        <div class="form-group"><label>Complainant *</label><input type="text" id="b-complainant" placeholder="Full name"></div>
+        <div class="form-group"><label>Respondent *</label><input type="text" id="b-respondent" placeholder="Full name"></div>
+        <div class="form-group full"><label>Incident Type *</label>
+          <select id="b-incident">
+            <option value="">Select type</option>
+            <option>Physical Altercation</option>
+            <option>Verbal Altercation</option>
+            <option>Theft / Robbery</option>
+            <option>Property Damage</option>
+            <option>Noise Complaint</option>
+            <option>Trespassing</option>
+            <option>Domestic Violence</option>
+            <option>Threat / Intimidation</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Date of Incident</label><input type="date" id="b-incident-date"></div>
+        <div class="form-group"><label>Status</label>
+          <select id="b-status">
+            <option value="Active">Active / Under Investigation</option>
+            <option value="Settled">Amicably Settled</option>
+            <option value="Referred">Referred to Higher Authority</option>
+            <option value="Closed">Closed</option>
+          </select>
+        </div>
+        <div class="form-group full"><label>Narrative / Details *</label><textarea id="b-narrative" placeholder="Describe what happened..."></textarea></div>
+      </div>
+      <div class="form-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modal-blotter')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveBlotter()">File Blotter</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Official Modal -->
+<div class="modal-overlay" id="modal-official">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Add Official</div>
+      <button class="modal-close" onclick="closeModal('modal-official')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="official-id">
+      <div class="form-grid">
+        <div class="form-group full"><label>Full Name *</label><input type="text" id="o-name" placeholder="Full name of official"></div>
+        <div class="form-group"><label>Position *</label>
+          <select id="o-position">
+            <option value="">Select</option>
+            <option>Punong Barangay</option>
+            <option>Barangay Kagawad</option>
+            <option>SK Chairperson</option>
+            <option>Barangay Secretary</option>
+            <option>Barangay Treasurer</option>
+            <option>Lupong Tagapamayapa Member</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Contact</label><input type="text" id="o-contact" placeholder="09XXXXXXXXX"></div>
+        <div class="form-group"><label>Committee</label><input type="text" id="o-committee" placeholder="Peace & Order, Health, etc."></div>
+        <div class="form-group"><label>Term Start</label><input type="date" id="o-term-start"></div>
+        <div class="form-group"><label>Term End</label><input type="date" id="o-term-end"></div>
+      </div>
+      <div class="form-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modal-official')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveOfficial()">Save Official</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ==================== STORAGE ====================
+const store = {
+  get: k => JSON.parse(localStorage.getItem('brgy_' + k) || '[]'),
+  set: (k, v) => localStorage.setItem('brgy_' + k, JSON.stringify(v)),
+};
+
+function uid() { return Date.now() + Math.random().toString(36).slice(2, 7); }
+
+function calcAge(dob) {
+  if (!dob) return '-';
+  const d = new Date(dob), n = new Date();
+  let a = n.getFullYear() - d.getFullYear();
+  if (n < new Date(n.getFullYear(), d.getMonth(), d.getDate())) a--;
+  return a;
+}
+
+function today() { return new Date().toISOString().split('T')[0]; }
+
+function initDefaultDate() {
+  const fields = ['doc-date','b-incident-date','o-term-start'];
+  fields.forEach(f => { const el = document.getElementById(f); if(el) el.value = today(); });
+}
+
+// ==================== NAVIGATION ====================
+let currentSection = 'dashboard';
+
+function showSection(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('section-' + name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick') && n.getAttribute('onclick').includes("'" + name + "'")) n.classList.add('active');
+  });
+  const titles = {
+    dashboard: 'Dashboard', residents: 'Residents', households: 'Households',
+    clearance: 'Barangay Clearance', indigency: 'Indigency Certificate',
+    blotter: 'Blotter Records', officials: 'Barangay Officials'
+  };
+  document.getElementById('page-title').textContent = titles[name] || name;
+  currentSection = name;
+  renderAll();
+}
+
+function openAddModal() {
+  const map = {
+    dashboard: () => openAddResidentModal(),
+    residents: () => openAddResidentModal(),
+    households: () => openHouseholdModal(),
+    clearance: () => openDocModal('clearance'),
+    indigency: () => openDocModal('indigency'),
+    blotter: () => openBlotterModal(),
+    officials: () => openOfficialModal(),
+  };
+  (map[currentSection] || map.dashboard)();
+}
+
+// ==================== TOAST ====================
+function toast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type + ' show';
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ==================== MODAL HELPERS ====================
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function openModal(id) { document.getElementById(id).classList.add('open'); initDefaultDate(); }
+
+// ==================== RESIDENTS ====================
+function openAddResidentModal(id = null) {
+  const fields = ['r-lastname','r-firstname','r-middlename','r-birthdate','r-gender','r-civil','r-contact','r-purok','r-address','r-occupation'];
+  fields.forEach(f => document.getElementById(f).value = '');
+  document.getElementById('r-voter').value = 'No';
+  document.getElementById('r-4ps').value = 'No';
+  document.getElementById('r-pwd').value = 'No';
+  document.getElementById('resident-id').value = '';
+  document.getElementById('resident-modal-title').textContent = 'Add Resident';
+  if (id) {
+    const r = store.get('residents').find(x => x.id === id);
+    if (r) {
+      document.getElementById('r-lastname').value = r.lastname || '';
+      document.getElementById('r-firstname').value = r.firstname || '';
+      document.getElementById('r-middlename').value = r.middlename || '';
+      document.getElementById('r-birthdate').value = r.birthdate || '';
+      document.getElementById('r-gender').value = r.gender || '';
+      document.getElementById('r-civil').value = r.civil || '';
+      document.getElementById('r-contact').value = r.contact || '';
+      document.getElementById('r-purok').value = r.purok || '';
+      document.getElementById('r-address').value = r.address || '';
+      document.getElementById('r-occupation').value = r.occupation || '';
+      document.getElementById('r-voter').value = r.voter || 'No';
+      document.getElementById('r-4ps').value = r.fourps || 'No';
+      document.getElementById('r-pwd').value = r.pwd || 'No';
+      document.getElementById('resident-id').value = id;
+      document.getElementById('resident-modal-title').textContent = 'Edit Resident';
+    }
+  }
+  openModal('modal-resident');
+}
+
+function saveResident() {
+  const ln = document.getElementById('r-lastname').value.trim();
+  const fn = document.getElementById('r-firstname').value.trim();
+  const bd = document.getElementById('r-birthdate').value;
+  const gn = document.getElementById('r-gender').value;
+  if (!ln || !fn || !bd || !gn) { toast('Please fill required fields.', 'error'); return; }
+  const list = store.get('residents');
+  const eid = document.getElementById('resident-id').value;
+  const rec = {
+    id: eid || uid(), lastname: ln, firstname: fn,
+    middlename: document.getElementById('r-middlename').value.trim(),
+    birthdate: bd, gender: gn,
+    civil: document.getElementById('r-civil').value,
+    contact: document.getElementById('r-contact').value.trim(),
+    purok: document.getElementById('r-purok').value.trim(),
+    address: document.getElementById('r-address').value.trim(),
+    occupation: document.getElementById('r-occupation').value.trim(),
+    voter: document.getElementById('r-voter').value,
+    fourps: document.getElementById('r-4ps').value,
+    pwd: document.getElementById('r-pwd').value,
+    created: eid ? (list.find(x=>x.id===eid)||{}).created || today() : today()
+  };
+  if (eid) {
+    const idx = list.findIndex(x => x.id === eid);
+    if (idx !== -1) list[idx] = rec; else list.push(rec);
+  } else { list.push(rec); }
+  store.set('residents', list);
+  closeModal('modal-resident');
+  renderAll();
+  toast(eid ? 'Resident updated!' : 'Resident added!');
+}
+
+function deleteResident(id) {
+  if (!confirm('Delete this resident? This cannot be undone.')) return;
+  store.set('residents', store.get('residents').filter(x => x.id !== id));
+  renderAll();
+  toast('Resident deleted.', 'error');
+}
+
+function renderResidents(list) {
+  const tbody = document.getElementById('residents-tbody');
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="8"><div class="empty"><div class="empty-icon">👥</div><p>No residents found</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map(r => `
+    <tr>
+      <td><strong>${r.lastname}, ${r.firstname}${r.middlename ? ' ' + r.middlename.charAt(0) + '.' : ''}</strong></td>
+      <td>${calcAge(r.birthdate)}</td>
+      <td><span class="badge ${r.gender==='Male'?'badge-blue':'badge-orange'}">${r.gender||'-'}</span></td>
+      <td>${r.civil||'-'}</td>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.address||r.purok||'-'}</td>
+      <td>${r.contact||'-'}</td>
+      <td><span class="badge ${r.voter==='Yes'?'badge-green':'badge-gray'}">${r.voter==='Yes'?'Voter':'No'}</span></td>
+      <td><div class="td-actions">
+        <button class="btn btn-secondary btn-xs" onclick="openAddResidentModal('${r.id}')">Edit</button>
+        <button class="btn btn-danger btn-xs" onclick="deleteResident('${r.id}')">Del</button>
+      </div></td>
+    </tr>`).join('');
+}
+
+function filterResidents(q) {
+  const g = document.getElementById('filter-gender').value;
+  const c = document.getElementById('filter-civil').value;
+  const list = store.get('residents').filter(r => {
+    const name = (r.lastname + ' ' + r.firstname + ' ' + r.middlename).toLowerCase();
+    const matchQ = !q || name.includes(q.toLowerCase()) || (r.contact||'').includes(q);
+    const matchG = !g || r.gender === g;
+    const matchC = !c || r.civil === c;
+    return matchQ && matchG && matchC;
+  });
+  renderResidents(list);
+}
+
+function globalSearch(q) {
+  if (!q) return;
+  showSection('residents');
+  document.getElementById('residents-search').value = q;
+  filterResidents(q);
+}
+
+// ==================== HOUSEHOLDS ====================
+function openHouseholdModal(id = null) {
+  ['h-head','h-address','h-purok','h-remarks'].forEach(f => document.getElementById(f).value = '');
+  document.getElementById('h-members').value = 1;
+  document.getElementById('household-id').value = '';
+  if (id) {
+    const r = store.get('households').find(x => x.id === id);
+    if (r) {
+      document.getElementById('h-head').value = r.head || '';
+      document.getElementById('h-address').value = r.address || '';
+      document.getElementById('h-purok').value = r.purok || '';
+      document.getElementById('h-members').value = r.members || 1;
+      document.getElementById('h-remarks').value = r.remarks || '';
+      document.getElementById('household-id').value = id;
+    }
+  }
+  openModal('modal-household');
+}
+
+function saveHousehold() {
+  const head = document.getElementById('h-head').value.trim();
+  const addr = document.getElementById('h-address').value.trim();
+  if (!head) { toast('Household head required.', 'error'); return; }
+  const list = store.get('households');
+  const eid = document.getElementById('household-id').value;
+  const rec = { id: eid || uid(), head, address: addr, purok: document.getElementById('h-purok').value.trim(), members: document.getElementById('h-members').value, remarks: document.getElementById('h-remarks').value.trim(), created: today() };
+  if (eid) { const i = list.findIndex(x=>x.id===eid); if(i!==-1) list[i]=rec; else list.push(rec); } else list.push(rec);
+  store.set('households', list);
+  closeModal('modal-household');
+  renderAll();
+  toast('Household saved!');
+}
+
+function deleteHousehold(id) {
+  if (!confirm('Delete this household?')) return;
+  store.set('households', store.get('households').filter(x => x.id !== id));
+  renderAll();
+  toast('Deleted.', 'error');
+}
+
+function renderHouseholds() {
+  const list = store.get('households');
+  const tbody = document.getElementById('households-tbody');
+  if (!list.length) { tbody.innerHTML = '<tr><td colspan="6"><div class="empty"><div class="empty-icon">🏠</div><p>No households yet</p></div></td></tr>'; return; }
+  tbody.innerHTML = list.map(h => `
+    <tr>
+      <td><strong>${h.head}</strong></td>
+      <td>${h.address||'-'}</td>
+      <td><span class="badge badge-blue">${h.members||0} members</span></td>
+      <td>${h.purok||'-'}</td>
+      <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${h.remarks||'-'}</td>
+      <td><div class="td-actions">
+        <button class="btn btn-secondary btn-xs" onclick="openHouseholdModal('${h.id}')">Edit</button>
+        <button class="btn btn-danger btn-xs" onclick="deleteHousehold('${h.id}')">Del</button>
+      </div></td>
+    </tr>`).join('');
+}
+
+// ==================== DOCUMENTS ====================
+function openDocModal(type, id = null) {
+  ['doc-requestor','doc-address','doc-or'].forEach(f => document.getElementById(f).value = '');
+  document.getElementById('doc-amount').value = '';
+  document.getElementById('doc-purpose').value = '';
+  document.getElementById('doc-status').value = 'Pending';
+  document.getElementById('doc-date').value = today();
+  document.getElementById('doc-type').value = type;
+  document.getElementById('doc-id').value = '';
+  document.getElementById('doc-modal-title').textContent = type === 'clearance' ? 'Barangay Clearance Request' : 'Indigency Certificate Request';
+  const isClear = type === 'clearance';
+  document.getElementById('doc-or-group').style.display = isClear ? '' : 'none';
+  document.getElementById('doc-amount-group').style.display = isClear ? '' : 'none';
+  if (id) {
+    const r = store.get('docs').find(x => x.id === id);
+    if (r) {
+      document.getElementById('doc-requestor').value = r.requestor || '';
+      document.getElementById('doc-address').value = r.address || '';
+      document.getElementById('doc-purpose').value = r.purpose || '';
+      document.getElementById('doc-or').value = r.or || '';
+      document.getElementById('doc-amount').value = r.amount || '';
+      document.getElementById('doc-status').value = r.status || 'Pending';
+      document.getElementById('doc-date').value = r.date || today();
+      document.getElementById('doc-id').value = id;
+    }
+  }
+  openModal('modal-doc');
+}
+
+function saveDocument() {
+  const req = document.getElementById('doc-requestor').value.trim();
+  const pur = document.getElementById('doc-purpose').value;
+  if (!req || !pur) { toast('Please fill required fields.', 'error'); return; }
+  const list = store.get('docs');
+  const eid = document.getElementById('doc-id').value;
+  const type = document.getElementById('doc-type').value;
+  const rec = {
+    id: eid || uid(), type, requestor: req,
+    address: document.getElementById('doc-address').value.trim(),
+    purpose: pur, or: document.getElementById('doc-or').value.trim(),
+    amount: document.getElementById('doc-amount').value,
+    status: document.getElementById('doc-status').value,
+    date: document.getElementById('doc-date').value,
+    created: today()
+  };
+  if (eid) { const i = list.findIndex(x=>x.id===eid); if(i!==-1) list[i]=rec; else list.push(rec); } else list.push(rec);
+  store.set('docs', list);
+  closeModal('modal-doc');
+  renderAll();
+  toast('Document request saved!');
+}
+
+function deleteDoc(id) {
+  if (!confirm('Delete this request?')) return;
+  store.set('docs', store.get('docs').filter(x => x.id !== id));
+  renderAll();
+  toast('Deleted.', 'error');
+}
+
+function docStatusBadge(s) {
+  const m = { Pending: 'badge-orange', Processing: 'badge-blue', Ready: 'badge-green', Released: 'badge-gray' };
+  return `<span class="badge ${m[s]||'badge-gray'}">${s}</span>`;
+}
+
+function renderDocs(type) {
+  const list = store.get('docs').filter(x => x.type === type);
+  const id = type + '-tbody';
+  const tbody = document.getElementById(id);
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="${type==='clearance'?7:5}"><div class="empty"><div class="empty-icon">📋</div><p>No requests yet</p></div></td></tr>`;
+    return;
+  }
+  const rows = list.map(d => {
+    const base = `<td><strong>${d.requestor}</strong></td><td>${d.purpose}</td><td>${d.date||'-'}</td><td>${docStatusBadge(d.status)}</td>`;
+    const extra = type === 'clearance' ? `<td>${d.or||'-'}</td><td>${d.amount?'₱'+parseFloat(d.amount).toFixed(2):'-'}</td>` : '';
+    const actions = `<td><div class="td-actions">
+      <button class="btn btn-secondary btn-xs" onclick="openDocModal('${type}','${d.id}')">Edit</button>
+      <button class="btn btn-danger btn-xs" onclick="deleteDoc('${d.id}')">Del</button>
+    </div></td>`;
+    return `<tr>${base}${extra}${actions}</tr>`;
+  }).join('');
+  tbody.innerHTML = rows;
+}
+
+// ==================== BLOTTER ====================
+let blotterCounter = 0;
+
+function openBlotterModal(id = null) {
+  ['b-complainant','b-respondent','b-narrative'].forEach(f => document.getElementById(f).value = '');
+  document.getElementById('b-incident').value = '';
+  document.getElementById('b-status').value = 'Active';
+  document.getElementById('b-incident-date').value = today();
+  document.getElementById('blotter-id').value = '';
+  if (id) {
+    const r = store.get('blotter').find(x => x.id === id);
+    if (r) {
+      document.getElementById('b-complainant').value = r.complainant || '';
+      document.getElementById('b-respondent').value = r.respondent || '';
+      document.getElementById('b-incident').value = r.incident || '';
+      document.getElementById('b-incident-date').value = r.incidentDate || today();
+      document.getElementById('b-status').value = r.status || 'Active';
+      document.getElementById('b-narrative').value = r.narrative || '';
+      document.getElementById('blotter-id').value = id;
+    }
+  }
+  openModal('modal-blotter');
+}
+
+function saveBlotter() {
+  const c = document.getElementById('b-complainant').value.trim();
+  const r = document.getElementById('b-respondent').value.trim();
+  const i = document.getElementById('b-incident').value;
+  if (!c || !r || !i) { toast('Please fill required fields.', 'error'); return; }
+  const list = store.get('blotter');
+  const eid = document.getElementById('blotter-id').value;
+  const caseNo = eid ? (list.find(x=>x.id===eid)||{}).caseNo : 'BLT-' + String(list.length + 1).padStart(4, '0');
+  const rec = {
+    id: eid || uid(), caseNo, complainant: c, respondent: r, incident: i,
+    incidentDate: document.getElementById('b-incident-date').value,
+    status: document.getElementById('b-status').value,
+    narrative: document.getElementById('b-narrative').value.trim(),
+    created: today()
+  };
+  if (eid) { const idx = list.findIndex(x=>x.id===eid); if(idx!==-1) list[idx]=rec; else list.push(rec); } else list.push(rec);
+  store.set('blotter', list);
+  closeModal('modal-blotter');
+  renderAll();
+  toast('Blotter filed!');
+}
+
+function deleteBlotter(id) {
+  if (!confirm('Delete this blotter record?')) return;
+  store.set('blotter', store.get('blotter').filter(x => x.id !== id));
+  renderAll();
+  toast('Deleted.', 'error');
+}
+
+function blotterStatusBadge(s) {
+  const m = { Active: 'badge-red', Settled: 'badge-green', Referred: 'badge-orange', Closed: 'badge-gray' };
+  return `<span class="badge ${m[s]||'badge-gray'}">${s}</span>`;
+}
+
+function renderBlotter() {
+  const list = store.get('blotter');
+  const tbody = document.getElementById('blotter-tbody');
+  if (!list.length) { tbody.innerHTML = '<tr><td colspan="7"><div class="empty"><div class="empty-icon">🛡️</div><p>No blotter records yet</p></div></td></tr>'; return; }
+  tbody.innerHTML = list.map(b => `
+    <tr>
+      <td><strong>${b.caseNo}</strong></td>
+      <td>${b.complainant}</td>
+      <td>${b.respondent}</td>
+      <td>${b.incident}</td>
+      <td>${b.incidentDate||b.created||'-'}</td>
+      <td>${blotterStatusBadge(b.status)}</td>
+      <td><div class="td-actions">
+        <button class="btn btn-secondary btn-xs" onclick="openBlotterModal('${b.id}')">Edit</button>
+        <button class="btn btn-danger btn-xs" onclick="deleteBlotter('${b.id}')">Del</button>
+      </div></td>
+    </tr>`).join('');
+}
+
+// ==================== OFFICIALS ====================
+function openOfficialModal(id = null) {
+  ['o-name','o-contact','o-committee','o-term-start','o-term-end'].forEach(f => document.getElementById(f).value = '');
+  document.getElementById('o-position').value = '';
+  document.getElementById('official-id').value = '';
+  if (id) {
+    const r = store.get('officials').find(x => x.id === id);
+    if (r) {
+      document.getElementById('o-name').value = r.name || '';
+      document.getElementById('o-position').value = r.position || '';
+      document.getElementById('o-contact').value = r.contact || '';
+      document.getElementById('o-committee').value = r.committee || '';
+      document.getElementById('o-term-start').value = r.termStart || '';
+      document.getElementById('o-term-end').value = r.termEnd || '';
+      document.getElementById('official-id').value = id;
+    }
+  }
+  openModal('modal-official');
+}
+
+function saveOfficial() {
+  const n = document.getElementById('o-name').value.trim();
+  const p = document.getElementById('o-position').value;
+  if (!n || !p) { toast('Name and position required.', 'error'); return; }
+  const list = store.get('officials');
+  const eid = document.getElementById('official-id').value;
+  const rec = { id: eid || uid(), name: n, position: p, contact: document.getElementById('o-contact').value.trim(), committee: document.getElementById('o-committee').value.trim(), termStart: document.getElementById('o-term-start').value, termEnd: document.getElementById('o-term-end').value };
+  if (eid) { const i = list.findIndex(x=>x.id===eid); if(i!==-1) list[i]=rec; else list.push(rec); } else list.push(rec);
+  store.set('officials', list);
+  closeModal('modal-official');
+  renderAll();
+  toast('Official saved!');
+}
+
+function deleteOfficial(id) {
+  if (!confirm('Delete this official?')) return;
+  store.set('officials', store.get('officials').filter(x => x.id !== id));
+  renderAll();
+  toast('Deleted.', 'error');
+}
+
+function officialPosBadge(p) {
+  if (p.includes('Punong')) return 'badge-green';
+  if (p.includes('SK')) return 'badge-orange';
+  if (p.includes('Secretary') || p.includes('Treasurer')) return 'badge-blue';
+  return 'badge-gray';
+}
+
+function renderOfficials() {
+  const list = store.get('officials');
+  const tbody = document.getElementById('officials-tbody');
+  if (!list.length) { tbody.innerHTML = '<tr><td colspan="6"><div class="empty"><div class="empty-icon">🏅</div><p>No officials added yet</p></div></td></tr>'; return; }
+  tbody.innerHTML = list.map(o => `
+    <tr>
+      <td><strong>${o.name}</strong></td>
+      <td><span class="badge ${officialPosBadge(o.position)}">${o.position}</span></td>
+      <td>${o.contact||'-'}</td>
+      <td>${o.committee||'-'}</td>
+      <td>${o.termStart||'-'}</td>
+      <td><div class="td-actions">
+        <button class="btn btn-secondary btn-xs" onclick="openOfficialModal('${o.id}')">Edit</button>
+        <button class="btn btn-danger btn-xs" onclick="deleteOfficial('${o.id}')">Del</button>
+      </div></td>
+    </tr>`).join('');
+}
+
+// ==================== DASHBOARD ====================
+function renderDashboard() {
+  const residents = store.get('residents');
+  const households = store.get('households');
+  const docs = store.get('docs');
+  const blotter = store.get('blotter');
+
+  document.getElementById('stat-residents').textContent = residents.length;
+  document.getElementById('stat-households').textContent = households.length;
+  document.getElementById('stat-docs').textContent = docs.length;
+  document.getElementById('stat-pending').textContent = docs.filter(d => d.status === 'Pending').length;
+  document.getElementById('stat-blotter').textContent = blotter.length;
+  document.getElementById('stat-active-cases').textContent = blotter.filter(b => b.status === 'Active').length;
+
+  document.getElementById('nav-residents-count').textContent = residents.length;
+  document.getElementById('nav-doc-count').textContent = docs.filter(d => d.status === 'Pending').length;
+
+  // Recent residents
+  const recent = [...residents].reverse().slice(0, 5);
+  const rrList = document.getElementById('recent-residents-list');
+  if (!recent.length) {
+    rrList.innerHTML = '<div class="empty"><div class="empty-icon">👥</div><p>No residents yet</p></div>';
+  } else {
+    rrList.innerHTML = recent.map(r => `
+      <div class="recent-item">
+        <div class="avatar">${r.firstname.charAt(0)}${r.lastname.charAt(0)}</div>
+        <div>
+          <div class="recent-name">${r.firstname} ${r.lastname}</div>
+          <div class="recent-detail">${r.purok||r.address||'—'} · Age ${calcAge(r.birthdate)}</div>
+        </div>
+        <span class="badge ${r.gender==='Male'?'badge-blue':'badge-orange'}" style="margin-left:auto">${r.gender||'—'}</span>
+      </div>`).join('');
+  }
+
+  // Pending docs
+  const pending = docs.filter(d => d.status === 'Pending').slice(-5).reverse();
+  const pdList = document.getElementById('pending-docs-list');
+  if (!pending.length) {
+    pdList.innerHTML = '<div class="empty"><div class="empty-icon">📄</div><p>No pending requests</p></div>';
+  } else {
+    pdList.innerHTML = pending.map(d => `
+      <div class="recent-item">
+        <div class="avatar" style="background:var(--accent2-light);color:var(--accent2)">📋</div>
+        <div>
+          <div class="recent-name">${d.requestor}</div>
+          <div class="recent-detail">${d.type === 'clearance' ? 'Clearance' : 'Indigency'} · ${d.purpose}</div>
+        </div>
+        <span class="badge badge-orange" style="margin-left:auto">Pending</span>
+      </div>`).join('');
+  }
+}
+
+// ==================== RENDER ALL ====================
+function renderAll() {
+  renderDashboard();
+  renderResidents(store.get('residents'));
+  renderHouseholds();
+  renderDocs('clearance');
+  renderDocs('indigency');
+  renderBlotter();
+  renderOfficials();
+}
+
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });
+});
+
+// Init
+renderAll();
+</script>
+</body>
+</html>
